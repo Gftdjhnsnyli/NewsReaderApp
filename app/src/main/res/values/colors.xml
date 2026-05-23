@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Palette (Modern News Blue) -->
+    <color name="primary">#1A237E</color>
+    <color name="primary_light">#534BAE</color>
+    <color name="primary_dark">#000051</color>
+
+    <!-- Secondary/Accent -->
+    <color name="accent">#FFAB00</color>
+
+    <!-- Neutral Colors -->
+    <color name="background">#F5F5F7</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider">#BDBDBD</color>
+
+    <!-- Standard Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent_black_40">#66000000</color>
+</resources>
