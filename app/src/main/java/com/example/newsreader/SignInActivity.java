@@ -1,7 +1,6 @@
 package com.example.newsreader;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -23,6 +22,9 @@ import java.util.concurrent.Executor;
 public class SignInActivity extends AppCompatActivity {
 
     private static final String TAG = "SignInActivity";
+    // ✅ REPLACE THIS with your Web Application Client ID from Google Cloud Console
+    private static final String WEB_CLIENT_ID = "197897894392-s0bm5fn7mmvk07a19q86frthnh179mda.apps.googleusercontent.com";
+
     private CredentialManager credentialManager;
     private Executor mainExecutor;
     private SettingsManager settingsManager;
@@ -48,10 +50,13 @@ public class SignInActivity extends AppCompatActivity {
         }
 
         if (tvSignUp != null) {
-            tvSignUp.setOnClickListener(v -> startActivity(new Intent(SignInActivity.this, SignUpActivity.class)));
+            tvSignUp.setOnClickListener(v ->
+                    startActivity(new Intent(SignInActivity.this, SignUpActivity.class))
+            );
         }
 
-        findViewById(R.id.btn_google).setOnClickListener(v -> handleBrowserGoogleSignIn());
+        // ✅ Now correctly calls the real Google Sign-In method
+        findViewById(R.id.btn_google).setOnClickListener(v -> handleGoogleSignIn());
 
         findViewById(R.id.btn_facebook).setOnClickListener(v -> {
             settingsManager.setLoggedIn(true);
@@ -68,39 +73,11 @@ public class SignInActivity extends AppCompatActivity {
         });
     }
 
-    private void handleBrowserGoogleSignIn() {
-        // Professional Google Account Chooser URL
-        // Corrected to use NewsReader identity
-        String clientId = "173709198955-nkj6h0ag8soarm2bpbp9pc0ulp0s5t2b.apps.googleusercontent.com";
-        String redirectUri = "https://newsreader.example.com/auth/callback"; // Updated to NewsReader domain
-        
-        String url = "https://accounts.google.com/v3/signin/accountchooser" +
-                "?client_id=" + clientId +
-                "&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent" +
-                "&flowName=GeneralOAuthFlow" +
-                "&scope=openid+email+profile" +
-                "&response_type=id_token" +
-                "&redirect_uri=" + Uri.encode(redirectUri) +
-                "&prompt=select_account" +
-                "&display=popup" +
-                "&origin=https%3A%2F%2Fnewsreader.example.com" + // Corrected branding origin
-                "&app_domain=https%3A%2F%2Fnewsreader.example.com"; // Corrected app domain branding
-
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(browserIntent);
-        
-        // After the browser opens, we simulate the 'Handshake' completed when the user returns
-        settingsManager.setLoggedIn(true);
-        Toast.makeText(this, "Redirecting to Google Secure Sign-In for NewsReader...", Toast.LENGTH_LONG).show();
-    }
-
     private void handleGoogleSignIn() {
-        String webClientId = getString(R.string.default_web_client_id);
-
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(webClientId)
-                .setAutoSelectEnabled(true)
+                .setFilterByAuthorizedAccounts(false) // Show all Google accounts on device
+                .setServerClientId(WEB_CLIENT_ID)
+                .setAutoSelectEnabled(false) // Always show account picker
                 .build();
 
         GetCredentialRequest request = new GetCredentialRequest.Builder()
@@ -120,8 +97,12 @@ public class SignInActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
-                        Log.e(TAG, "Credential Manager Error: " + e.getMessage());
-                        Toast.makeText(SignInActivity.this, "Sign-in failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "Sign-in error: " + e.getMessage());
+                        Toast.makeText(
+                                SignInActivity.this,
+                                "Sign-in failed: " + e.getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
                 }
         );
@@ -140,19 +121,28 @@ public class SignInActivity extends AppCompatActivity {
 
                     String email = googleIdTokenCredential.getId();
                     String displayName = googleIdTokenCredential.getDisplayName();
+                    String name = displayName != null ? displayName : "Google User";
 
                     settingsManager.setLoggedIn(true);
-                    Log.d(TAG, "Google Sign-In Success. User Email: " + email);
-                    Toast.makeText(this, "Welcome " + (displayName != null ? displayName : email), Toast.LENGTH_SHORT).show();
+                    settingsManager.saveUserProfile(name, email);
+
+                    Log.d(TAG, "Google Sign-In Success. Email: " + email);
+                    Toast.makeText(this, "Welcome, " + name + "!", Toast.LENGTH_SHORT).show();
 
                     startActivity(new Intent(SignInActivity.this, HomepageActivity.class));
                     finish();
 
                 } catch (Exception e) {
-                    Log.e(TAG, "Error processing Google Account structure.", e);
-                    Toast.makeText(this, "Error processing Google Account structure.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error parsing Google credential", e);
+                    Toast.makeText(this, "Error processing Google account.", Toast.LENGTH_SHORT).show();
                 }
+            } else {
+                Log.w(TAG, "Unexpected credential type: " + customCredential.getType());
+                Toast.makeText(this, "Unexpected credential type.", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            Log.w(TAG, "Credential is not a CustomCredential");
+            Toast.makeText(this, "Unrecognized credential.", Toast.LENGTH_SHORT).show();
         }
     }
 }

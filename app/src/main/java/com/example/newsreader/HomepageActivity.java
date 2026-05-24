@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import com.example.newsreader.fragments.BookmarksFragment;
 import com.example.newsreader.fragments.ExploreFragment;
 import com.example.newsreader.fragments.FeedsFragment;
@@ -18,6 +19,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class HomepageActivity extends AppCompatActivity {
 
     private SettingsManager settingsManager;
+    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +34,12 @@ public class HomepageActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
@@ -50,16 +55,31 @@ public class HomepageActivity extends AppCompatActivity {
                     selectedFragment = new ProfileFragment();
                 } else {
                     startActivity(new Intent(this, SignInActivity.class));
-                    return false; // Don't switch the tab if not signed in
+                    return false;
                 }
             }
 
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
+                        .addToBackStack(null)
                         .commit();
             }
             return true;
+        });
+
+        // Sync bottom navigation selection when backstack changes
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            if (currentFragment instanceof FeedsFragment) {
+                bottomNav.getMenu().findItem(R.id.nav_feeds).setChecked(true);
+            } else if (currentFragment instanceof ExploreFragment) {
+                bottomNav.getMenu().findItem(R.id.nav_explore).setChecked(true);
+            } else if (currentFragment instanceof BookmarksFragment) {
+                bottomNav.getMenu().findItem(R.id.nav_bookmarks).setChecked(true);
+            } else if (currentFragment instanceof ProfileFragment) {
+                bottomNav.getMenu().findItem(R.id.nav_profile).setChecked(true);
+            }
         });
 
         if (savedInstanceState == null) {

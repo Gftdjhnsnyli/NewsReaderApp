@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.newsreader.R;
 import com.example.newsreader.SettingsManager;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class BookmarksFragment extends Fragment {
 
@@ -17,6 +18,18 @@ public class BookmarksFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bookmarks, container, false);
+
+        View btnExplore = view.findViewById(R.id.btn_explore_news);
+        if (btnExplore != null) {
+            btnExplore.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
+                    if (bottomNav != null) {
+                        bottomNav.setSelectedItemId(R.id.nav_explore);
+                    }
+                }
+            });
+        }
 
         SettingsManager settingsManager = new SettingsManager(requireContext());
         int fontSize = settingsManager.getFontSize();

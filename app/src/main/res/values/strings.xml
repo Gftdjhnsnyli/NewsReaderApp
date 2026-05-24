@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">NewsReader</string>
-    <string name="title_feeds">Feeds</string>
+    <string name="web_client_id">197897894392-coj5c1ae9354fuh243fin9k5hbtfg6ph.apps.googleusercontent.com</string>
+    <string name="title_feeds">Home</string>
     <string name="title_explore">Explore</string>
     <string name="title_bookmarks">Bookmarks</string>
     <string name="title_profile">Profile</string>
@@ -33,6 +34,13 @@
     <string name="explore_news">Explore News</string>
     <string name="app_preferences">App Preferences</string>
     <string name="logout">Logout</string>
+    <string name="settings_personalization">Settings &amp; Personalization</string>
+    <string name="content_reference">Content Reference</string>
+    <string name="app_language">App Language</string>
+    <string name="welcome_voice">Welcome Voice</string>
+    <string name="enable_welcome_sound">Enable voice greeting on launch</string>
+    <string name="save_settings">Save Settings</string>
+    <string name="welcome_to_newsreader">Welcome to NewsReader</string>
     <string name="font_style">Font Style</string>
     <string name="or_continue_with">Or continue with</string>
     <string name="google">Google</string>
