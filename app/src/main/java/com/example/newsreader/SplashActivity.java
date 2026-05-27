@@ -43,10 +43,12 @@ public class SplashActivity extends AppCompatActivity {
 
         // Handle Welcome Voice greeting
         if (settingsManager.isWelcomeVoiceEnabled()) {
-            tts = new TextToSpeech(this, status -> {
+            tts = new TextToSpeech(getApplicationContext(), status -> {
                 if (status == TextToSpeech.SUCCESS) {
                     tts.setLanguage(new Locale(settingsManager.getAppLanguage()));
-                    tts.speak(getString(R.string.welcome_to_newsreader), TextToSpeech.QUEUE_FLUSH, null, "welcome_id");
+                    if (!isFinishing()) {
+                        tts.speak(getString(R.string.welcome_to_newsreader), TextToSpeech.QUEUE_FLUSH, null, "welcome_id");
+                    }
                 }
             });
         }

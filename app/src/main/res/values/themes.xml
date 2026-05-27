@@ -15,6 +15,8 @@
         <item name="android:windowBackground">@color/background</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/text_primary</item>
+        <!-- Ensure fitsSystemWindows behavior is consistent -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="Theme.NewsReader" parent="Base.Theme.NewsReader" />
@@ -30,13 +32,13 @@
     <!-- Professional Typography Styles -->
     <style name="TextAppearance.NewsHeader" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:fontFamily">sans-serif-black</item>
     </style>
 
     <style name="TextAppearance.NewsTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:lineSpacingExtra">2sp</item>
     </style>
 

@@ -46,25 +46,27 @@ public class SettingsActivity extends AppCompatActivity {
         switchVoice.setChecked(settingsManager.isWelcomeVoiceEnabled());
 
         findViewById(R.id.btn_save_settings).setOnClickListener(v -> {
-            // Save language
-            String lang = "en";
+            // Determine language selection
+            String selectedLang;
             int checkedId = rgLanguage.getCheckedRadioButtonId();
             if (checkedId == R.id.rb_spanish) {
-                lang = "es";
+                selectedLang = "es";
             } else if (checkedId == R.id.rb_french) {
-                lang = "fr";
+                selectedLang = "fr";
             } else if (checkedId == R.id.rb_arabic) {
-                lang = "ar";
+                selectedLang = "ar";
+            } else {
+                selectedLang = "en";
             }
             
-            settingsManager.setAppLanguage(lang);
+            settingsManager.setAppLanguage(selectedLang);
             
             // Save voice setting
             settingsManager.setWelcomeVoiceEnabled(switchVoice.isChecked());
             
             Toast.makeText(this, R.string.save_settings, Toast.LENGTH_SHORT).show();
             
-            // Restart App to apply changes globally
+            // Restart App to apply changes globally and clear any layout state
             Intent intent = new Intent(this, SplashActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

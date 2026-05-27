@@ -41,7 +41,7 @@
                 android:layout_height="match_parent"
                 android:padding="16dp"
                 android:scaleType="centerInside"
-                android:src="@mipmap/ic_launcher"
+                android:src="@mipmap/ic_launcher_foreground"
                 android:contentDescription="@string/app_name" />
         </com.google.android.material.card.MaterialCardView>
 

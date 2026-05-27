@@ -2,9 +2,8 @@ package com.example.newsreader;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import java.util.Locale;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
 
 public class SettingsManager {
     private static final String PREFS_NAME = "news_reader_prefs";
@@ -14,8 +13,6 @@ public class SettingsManager {
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
-    
-    // New Keys
     private static final String KEY_APP_LANGUAGE = "app_language";
     private static final String KEY_WELCOME_VOICE_ENABLED = "welcome_voice_enabled";
 
@@ -24,10 +21,8 @@ public class SettingsManager {
     public static final int THEME_SYSTEM = 0;
 
     private final SharedPreferences prefs;
-    private final Context context;
 
     public SettingsManager(Context context) {
-        this.context = context;
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
@@ -79,7 +74,6 @@ public class SettingsManager {
         prefs.edit().remove(KEY_USER_NAME).remove(KEY_USER_EMAIL).apply();
     }
 
-    // New Settings Methods
     public void setAppLanguage(String langCode) {
         prefs.edit().putString(KEY_APP_LANGUAGE, langCode).apply();
         applyLanguage(langCode);
@@ -98,12 +92,7 @@ public class SettingsManager {
     }
 
     public void applyLanguage(String langCode) {
-        Locale locale = new Locale(langCode);
-        Locale.setDefault(locale);
-        Resources resources = context.getResources();
-        Configuration config = resources.getConfiguration();
-        config.setLocale(locale);
-        context.createConfigurationContext(config);
-        resources.updateConfiguration(config, resources.getDisplayMetrics());
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
     }
 }
