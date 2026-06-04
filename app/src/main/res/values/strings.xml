@@ -55,4 +55,8 @@
     <string name="login_email">Login Email</string>
     <string name="btn_log_in">Log In</string>
     <string name="search">Search</string>
+    <string name="feedback">Feedback</string>
+    <string name="countries">Countries</string>
+    <string name="more_apps">More Apps</string>
+    <string name="appearance_settings">Appearance &amp; Theme</string>
 </resources>

@@ -6,6 +6,7 @@ import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -133,21 +134,14 @@ public class HomepageActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.theme_light) {
-            settingsManager.setThemeMode(SettingsManager.THEME_LIGHT);
-            applyTheme();
+        if (itemId == R.id.menu_feedback) {
+            Toast.makeText(this, "Opening Feedback...", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (itemId == R.id.theme_dark) {
-            settingsManager.setThemeMode(SettingsManager.THEME_DARK);
-            applyTheme();
+        } else if (itemId == R.id.menu_countries) {
+            Toast.makeText(this, "Opening Country Selection...", Toast.LENGTH_SHORT).show();
             return true;
-        } else if (itemId == R.id.theme_system) {
-            settingsManager.setThemeMode(SettingsManager.THEME_SYSTEM);
-            applyTheme();
-            return true;
-        } else if (itemId == R.id.menu_font_style) {
-            Intent intent = new Intent(Settings.ACTION_DISPLAY_SETTINGS);
-            startActivity(intent);
+        } else if (itemId == R.id.menu_more_apps) {
+            Toast.makeText(this, "Opening More Apps...", Toast.LENGTH_SHORT).show();
             return true;
         }
         return super.onOptionsItemSelected(item);

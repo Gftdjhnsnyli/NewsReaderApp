@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
 
 public class SettingsManager {
+    private static final String KEY_IS_GUEST = "is_guest_mode";
+
     private static final String PREFS_NAME = "news_reader_prefs";
     private static final String KEY_FONT_SIZE = "font_size";
     private static final String KEY_FONT_TYPE = "font_type";
@@ -94,5 +96,13 @@ public class SettingsManager {
     public void applyLanguage(String langCode) {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
+    }
+
+    public void setGuestMode(boolean isGuest){
+        prefs.edit().putBoolean(KEY_IS_GUEST, isGuest).apply();
+    }
+
+    public boolean isGuestMode(){
+        return prefs.getBoolean(KEY_IS_GUEST, false);
     }
 }

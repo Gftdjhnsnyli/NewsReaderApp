@@ -155,6 +155,15 @@
                             android:textStyle="bold"
                             app:cornerRadius="14dp" />
 
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnGuest"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Continue as Guest"
+                            android:textColor="?attr/colorPrimary" />
+
                     </LinearLayout>
 
                     <!-- Other options below the main form block -->

@@ -29,6 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         RadioGroup rgLanguage = findViewById(R.id.rg_language);
+        RadioGroup rgTheme = findViewById(R.id.rg_theme_settings);
         SwitchMaterial switchVoice = findViewById(R.id.switch_welcome_voice);
 
         // Load current language setting
@@ -43,30 +44,54 @@ public class SettingsActivity extends AppCompatActivity {
             rgLanguage.check(R.id.rb_english);
         }
 
+        // Load current theme setting
+        int currentTheme = settingsManager.getThemeMode();
+        if (currentTheme == SettingsManager.THEME_LIGHT) {
+            rgTheme.check(R.id.rb_theme_light);
+        } else if (currentTheme == SettingsManager.THEME_DARK) {
+            rgTheme.check(R.id.rb_theme_dark);
+        } else {
+            rgTheme.check(R.id.rb_theme_system);
+        }
+
         switchVoice.setChecked(settingsManager.isWelcomeVoiceEnabled());
 
+        findViewById(R.id.btn_system_font).setOnClickListener(v -> {
+            Intent intent = new Intent(android.provider.Settings.ACTION_DISPLAY_SETTINGS);
+            startActivity(intent);
+        });
+
         findViewById(R.id.btn_save_settings).setOnClickListener(v -> {
-            // Determine language selection
+            // Save language
             String selectedLang;
-            int checkedId = rgLanguage.getCheckedRadioButtonId();
-            if (checkedId == R.id.rb_spanish) {
+            int checkedLangId = rgLanguage.getCheckedRadioButtonId();
+            if (checkedLangId == R.id.rb_spanish) {
                 selectedLang = "es";
-            } else if (checkedId == R.id.rb_french) {
+            } else if (checkedLangId == R.id.rb_french) {
                 selectedLang = "fr";
-            } else if (checkedId == R.id.rb_arabic) {
+            } else if (checkedLangId == R.id.rb_arabic) {
                 selectedLang = "ar";
             } else {
                 selectedLang = "en";
             }
-            
             settingsManager.setAppLanguage(selectedLang);
+            
+            // Save theme
+            int selectedTheme = SettingsManager.THEME_SYSTEM;
+            int checkedThemeId = rgTheme.getCheckedRadioButtonId();
+            if (checkedThemeId == R.id.rb_theme_light) {
+                selectedTheme = SettingsManager.THEME_LIGHT;
+            } else if (checkedThemeId == R.id.rb_theme_dark) {
+                selectedTheme = SettingsManager.THEME_DARK;
+            }
+            settingsManager.setThemeMode(selectedTheme);
             
             // Save voice setting
             settingsManager.setWelcomeVoiceEnabled(switchVoice.isChecked());
             
             Toast.makeText(this, R.string.save_settings, Toast.LENGTH_SHORT).show();
             
-            // Restart App to apply changes globally and clear any layout state
+            // Restart App to apply changes globally
             Intent intent = new Intent(this, SplashActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

@@ -36,6 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
             // Save user profile and log in
             settingsManager.saveUserProfile(name, email);
             settingsManager.setLoggedIn(true);
+            settingsManager.setGuestMode(false);
 
             Toast.makeText(this, "Account created successfully!", Toast.LENGTH_SHORT).show();
 

@@ -16,6 +16,7 @@ import com.example.newsreader.R;
 import com.example.newsreader.SettingsActivity;
 import com.example.newsreader.SettingsManager;
 import com.example.newsreader.SignInActivity;
+import com.google.android.material.button.MaterialButton;
 
 public class ProfileFragment extends Fragment {
 
@@ -35,7 +36,7 @@ public class ProfileFragment extends Fragment {
         tvProfileEmail = view.findViewById(R.id.tv_profile_email);
         tvLinkedStatus = view.findViewById(R.id.tv_linked_status);
         View btnEditProfile = view.findViewById(R.id.btn_edit_profile);
-        View btnLogout = view.findViewById(R.id.btn_logout);
+        MaterialButton btnLogout = view.findViewById(R.id.btn_logout);
 
         // Load persisted user data
         loadUserData();
@@ -60,7 +61,46 @@ public class ProfileFragment extends Fragment {
             }
         }
 
-        if (btnEditProfile != null) {
+        if (settingsManager.isGuestMode()) {
+            // 🟢 GUEST UI
+            tvProfileName.setText("Guest Profile");
+            tvProfileEmail.setText("Sign in to sync your bookmarks and preferences.");
+
+            if (btnLogout != null) {
+                btnLogout.setText("Sign In / Create Account");
+                btnLogout.setOnClickListener(v -> {
+                    settingsManager.setGuestMode(false); // Clear guest mode
+                    Intent intent = new Intent(requireContext(), SignInActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                });
+            }
+            
+            // Hide edit profile for guests
+            if (btnEditProfile != null) {
+                btnEditProfile.setVisibility(View.GONE);
+            }
+        } else {
+            // 🔵 NORMAL USER UI
+            tvProfileName.setText(settingsManager.getUserName());
+            tvProfileEmail.setText(settingsManager.getUserEmail());
+
+            if (btnLogout != null) {
+                btnLogout.setText("Sign Out");
+                btnLogout.setOnClickListener(v -> {
+                    settingsManager.setLoggedIn(false);
+                    settingsManager.setGuestMode(false);
+                    settingsManager.clearUserProfile();
+
+                    Intent intent = new Intent(requireContext(), SignInActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    requireActivity().finish();
+                });
+            }
+        }
+
+        if (btnEditProfile != null && !settingsManager.isGuestMode()) {
             btnEditProfile.setOnClickListener(v -> showEditProfileDialog());
         }
 
@@ -69,17 +109,6 @@ public class ProfileFragment extends Fragment {
             itemSettings.setOnClickListener(v -> {
                 Intent intent = new Intent(requireContext(), SettingsActivity.class);
                 startActivity(intent);
-            });
-        }
-
-        if (btnLogout != null) {
-            btnLogout.setOnClickListener(v -> {
-                settingsManager.setLoggedIn(false);
-                settingsManager.clearUserProfile();
-                Intent intent = new Intent(requireActivity(), SignInActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                requireActivity().finish();
             });
         }
 
@@ -94,9 +123,10 @@ public class ProfileFragment extends Fragment {
 
     private void updateAvatarInitials(View view) {
         String name = settingsManager.getUserName();
+        if (settingsManager.isGuestMode()) name = "Guest";
+        
         TextView tvInitials = view.findViewById(R.id.tv_avatar_initials);
         if (tvInitials != null && name != null && !name.trim().isEmpty()) {
-            // Get first letters of first + last name
             String[] parts = name.trim().split("\\s+");
             String initials;
             if (parts.length >= 2) {
@@ -134,7 +164,6 @@ public class ProfileFragment extends Fragment {
                         String newName = etName.getText().toString();
                         String newEmail = etEmail.getText().toString();
                         
-                        // Persist changes
                         settingsManager.saveUserProfile(newName, newEmail);
 
                         tvProfileName.setText(newName);
