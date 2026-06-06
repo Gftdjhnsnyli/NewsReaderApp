@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
 
 public class SettingsManager {
+    private static final String KEY_FIRST_LAUNCH = "is_first_launch";
     private static final String KEY_IS_GUEST = "is_guest_mode";
 
     private static final String PREFS_NAME = "news_reader_prefs";
@@ -15,6 +16,7 @@ public class SettingsManager {
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_EMAIL = "user_email";
+    private static final String KEY_USER_AVATAR = "user_avatar";
     private static final String KEY_APP_LANGUAGE = "app_language";
     private static final String KEY_WELCOME_VOICE_ENABLED = "welcome_voice_enabled";
 
@@ -73,7 +75,15 @@ public class SettingsManager {
     }
 
     public void clearUserProfile() {
-        prefs.edit().remove(KEY_USER_NAME).remove(KEY_USER_EMAIL).apply();
+        prefs.edit().remove(KEY_USER_NAME).remove(KEY_USER_EMAIL).remove(KEY_USER_AVATAR).apply();
+    }
+
+    public void setUserAvatar(String uri) {
+        prefs.edit().putString(KEY_USER_AVATAR, uri).apply();
+    }
+
+    public String getUserAvatar() {
+        return prefs.getString(KEY_USER_AVATAR, null);
     }
 
     public void setAppLanguage(String langCode) {
@@ -104,5 +114,13 @@ public class SettingsManager {
 
     public boolean isGuestMode(){
         return prefs.getBoolean(KEY_IS_GUEST, false);
+    }
+
+    public boolean isFirstLaunch() {
+        return prefs.getBoolean(KEY_FIRST_LAUNCH, true);
+    }
+
+    public void setFirstLaunchComplete() {
+        prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply();
     }
 }

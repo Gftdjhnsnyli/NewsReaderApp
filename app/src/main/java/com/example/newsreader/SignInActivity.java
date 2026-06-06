@@ -1,6 +1,9 @@
 package com.example.newsreader;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -8,17 +11,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.credentials.Credential;
-import androidx.credentials.CustomCredential;
 import androidx.credentials.CredentialManager;
+import androidx.credentials.CustomCredential;
 import androidx.credentials.GetCredentialRequest;
 import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
+
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
 
@@ -42,12 +53,44 @@ public class SignInActivity extends AppCompatActivity {
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^(?=.*[0-9])(?=.*[^a-zA-Z0-9 ]).{10,}$");
 
+    // ✅ Permission Launcher
+    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestMultiplePermissions(),
+            results -> {
+                boolean allGranted = true;
+                for (Map.Entry<String, Boolean> entry : results.entrySet()) {
+                    if (!entry.getValue()) {
+                        allGranted = false;
+                        Log.w("Permissions", "Denied: " + entry.getKey());
+                    }
+                }
+
+                if (allGranted) {
+                    Toast.makeText(this, "All permissions granted!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Some permissions denied. App features may be limited.", Toast.LENGTH_LONG).show();
+                }
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize SettingsManager first so we can check first launch & internet
+        settingsManager = new SettingsManager(this);
+
+        // ✅ 1. INTERNET CHECK
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            // Show the No Internet layout and STOP execution of the rest of onCreate
+            setContentView(R.layout.layout_no_internet);
+            findViewById(R.id.btn_retry).setOnClickListener(v -> recreate());
+            return;
+        }
+
+        // ✅ 2. If internet is available, proceed to normal Sign In screen
         setContentView(R.layout.activity_sign_in);
 
-        settingsManager = new SettingsManager(this);
         credentialManager = CredentialManager.create(this);
         mainExecutor = ContextCompat.getMainExecutor(this);
 
@@ -59,8 +102,8 @@ public class SignInActivity extends AppCompatActivity {
         Button btnGuest = findViewById(R.id.btnGuest);
         TextView tvSignUp = findViewById(R.id.tvRegisterLink);
 
-        if (btnGuest != null){
-            btnGuest.setOnClickListener(v ->{
+        if (btnGuest != null) {
+            btnGuest.setOnClickListener(v -> {
                 settingsManager.setLoggedIn(true);
                 settingsManager.setGuestMode(true);
                 settingsManager.saveUserProfile("Guest Profile", " ");
@@ -72,7 +115,7 @@ public class SignInActivity extends AppCompatActivity {
         }
 
         if (btnSignIn != null) {
-            //  credential validation
+            // Credential validation
             btnSignIn.setOnClickListener(v -> handleEmailSignIn());
         }
 
@@ -85,7 +128,6 @@ public class SignInActivity extends AppCompatActivity {
         // ✅ Google Sign-In
         findViewById(R.id.btn_google).setOnClickListener(v -> handleGoogleSignIn());
 
-
         findViewById(R.id.btn_facebook).setOnClickListener(v -> {
             Toast.makeText(this, "Please integrate Facebook SDK for real authentication.", Toast.LENGTH_LONG).show();
         });
@@ -93,6 +135,12 @@ public class SignInActivity extends AppCompatActivity {
         findViewById(R.id.btn_x).setOnClickListener(v -> {
             Toast.makeText(this, "Please integrate X (Twitter) SDK for real authentication.", Toast.LENGTH_LONG).show();
         });
+
+        // ✅ 3. FIRST LAUNCH PERMISSIONS CHECK
+        if (settingsManager.isFirstLaunch()) {
+            requestInitialPermissions();
+            settingsManager.setFirstLaunchComplete(); // Mark as complete so it doesn't ask again
+        }
     }
 
     private void handleEmailSignIn() {
@@ -122,10 +170,9 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-        // 4. TODO: Verify credentials against your backend or local database here.
-        // For demonstration, if it passes validation, we log them in and save their actual profile.
-        // This removes the default "John Doe" auto-account behavior.
+        // 4. Log them in and clear guest mode
         settingsManager.setLoggedIn(true);
+        settingsManager.setGuestMode(false); // ✅ Clear guest mode on real sign-in
 
         // Extract username from email (part before '@') or use the full email
         String username = email.contains("@") ? email.split("@")[0] : email;
@@ -192,6 +239,7 @@ public class SignInActivity extends AppCompatActivity {
                     String name = displayName != null ? displayName : email.split("@")[0];
 
                     settingsManager.setLoggedIn(true);
+                    settingsManager.setGuestMode(false); // ✅ Clear guest mode on real sign-in
                     settingsManager.saveUserProfile(name, email);
 
                     Log.d(TAG, "Google Sign-In Success. Email: " + email);
@@ -211,6 +259,38 @@ public class SignInActivity extends AppCompatActivity {
         } else {
             Log.w(TAG, "Credential is not a CustomCredential");
             Toast.makeText(this, "Unrecognized credential.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ✅ Method to request all safe permissions on first launch
+    private void requestInitialPermissions() {
+        List<String> permissions = new ArrayList<>();
+
+        // Handle OS version differences for Storage/Notifications
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS);
+            permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
+            permissions.add(Manifest.permission.READ_MEDIA_VIDEO);
+        } else {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+
+        // Standard safe permissions
+        permissions.add(Manifest.permission.CAMERA);
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        // Filter out permissions that are already granted to avoid errors
+        List<String> permissionsToRequest = new ArrayList<>();
+        for (String perm : permissions) {
+            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(perm);
+            }
+        }
+
+        // Launch the permission dialog if there are any to request
+        if (!permissionsToRequest.isEmpty()) {
+            permissionLauncher.launch(permissionsToRequest.toArray(new String[0]));
         }
     }
 }

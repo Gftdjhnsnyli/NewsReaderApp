@@ -35,4 +35,19 @@
     <string name="enable_welcome_sound">Habilitar saludo de voz al inicio</string>
     <string name="save_settings">Guardar ajustes</string>
     <string name="welcome_to_newsreader">Bienvenido a NoticiasNews</string>
+    <string name="feedback">Comentarios</string>
+    <string name="offline_news">noticias sin conexión</string>
+    <string name="more_apps">Más aplicaciones</string>
+    <string name="appearance_settings">Apariencia y tema</string>
+    <string name="stat_saved">Guardado</string>
+    <string name="stat_read">Leído</string>
+    <string name="stat_topics">Temas</string>
+    <string name="label_preferences">PREFERENCIAS</string>
+    <string name="label_account">CUENTA</string>
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="help_support">Ayuda y soporte</string>
+    <string name="edit_profile">Editar perfil</string>
+    <string name="sign_out">Cerrar sesión</string>
+    <string name="app_version">NoticiasNews v1.0.0</string>
+    <string name="linked_with_google">Vinculado con Google</string>
 </resources>

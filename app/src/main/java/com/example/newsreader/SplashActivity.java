@@ -1,29 +1,36 @@
 package com.example.newsreader;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
+import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
 import java.util.Locale;
 
 public class SplashActivity extends AppCompatActivity {
 
     private TextToSpeech tts;
+    private SettingsManager settingsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        SettingsManager settingsManager = new SettingsManager(this);
+
+        settingsManager = new SettingsManager(this);
         settingsManager.applyLanguage(settingsManager.getAppLanguage());
-        
+
         int mode = settingsManager.getThemeMode();
         if (mode == SettingsManager.THEME_LIGHT) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -53,10 +60,29 @@ public class SplashActivity extends AppCompatActivity {
             });
         }
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        // Just check internet and proceed after a delay
+        new Handler(Looper.getMainLooper()).postDelayed(this::checkInternetAndProceed, 2500);
+    }
+
+    private void checkInternetAndProceed() {
+        if (isNetworkAvailable()) {
             startActivity(new Intent(SplashActivity.this, HomepageActivity.class));
             finish();
-        }, 2500); // Extended slightly for greeting
+        } else {
+            Toast.makeText(this, "No internet connection. The app will close.", Toast.LENGTH_LONG).show();
+            new Handler(Looper.getMainLooper()).postDelayed(this::finish, 3000);
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        }
+        return false;
     }
 
     @Override

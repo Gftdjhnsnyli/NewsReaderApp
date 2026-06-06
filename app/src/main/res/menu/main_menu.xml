@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_offline_news"
+        android:title="@string/offline_news" />
+
+    <item
         android:id="@+id/menu_feedback"
         android:title="@string/feedback" />
 
     <item
-        android:id="@+id/menu_countries"
-        android:title="@string/countries" />
-
-    <item
-        android:id="@+id/menu_more_apps"
-        android:title="@string/more_apps" />
+        android:id="@+id/menu_about_us"
+        android:title="@string/about_us" />
 
 </menu>

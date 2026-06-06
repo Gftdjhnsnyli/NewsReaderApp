@@ -35,4 +35,19 @@
     <string name="enable_welcome_sound">Activer le message de bienvenue au lancement</string>
     <string name="save_settings">Enregistrer les paramètres</string>
     <string name="welcome_to_newsreader">Bienvenue sur NewsReader</string>
+    <string name="feedback">Commentaires</string>
+    <string name="offline_news">l\'actualité hors ligne</string>
+    <string name="more_apps">Plus d\'applications</string>
+    <string name="appearance_settings">Apparence et thème</string>
+    <string name="stat_saved">Enregistré</string>
+    <string name="stat_read">Lu</string>
+    <string name="stat_topics">Sujets</string>
+    <string name="label_preferences">PRÉFÉRENCES</string>
+    <string name="label_account">COMPTE</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="help_support">Aide et support</string>
+    <string name="edit_profile">Modifier le profil</string>
+    <string name="sign_out">Se déconnecter</string>
+    <string name="app_version">NewsReader v1.0.0</string>
+    <string name="linked_with_google">Lié à Google</string>
 </resources>

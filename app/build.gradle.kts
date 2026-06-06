@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.newsreader"
-        minSdk = 35
+        minSdk = 34
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -40,6 +40,8 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     
     // Google Sign-In (Credential Manager)
     implementation("androidx.credentials:credentials:1.6.0")

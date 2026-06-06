@@ -35,4 +35,19 @@
     <string name="enable_welcome_sound">تفعيل تحية الصوت عند التشغيل</string>
     <string name="save_settings">حفظ الإعدادات</string>
     <string name="welcome_to_newsreader">مرحباً بك في نيوز ريدر</string>
+    <string name="feedback">التعليقات</string>
+    <string name="offline_news"> أخبار غير متصلة بالإنترنت</string>
+    <string name="more_apps">المزيد من التطبيقات</string>
+    <string name="appearance_settings">المظهر والسمة</string>
+    <string name="stat_saved">تم الحفظ</string>
+    <string name="stat_read">تمت القراءة</string>
+    <string name="stat_topics">المواضيع</string>
+    <string name="label_preferences">التفضيلات</string>
+    <string name="label_account">الحساب</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="help_support">المساعدة والدعم</string>
+    <string name="edit_profile">تعديل الملف الشخصي</string>
+    <string name="sign_out">تسجيل الخروج</string>
+    <string name="app_version">نيوز ريدر v1.0.0</string>
+    <string name="linked_with_google">مرتبط بـ جوجل</string>
 </resources>
