@@ -1,7 +1,9 @@
 package com.example.newsreader;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
@@ -11,18 +13,43 @@ import android.speech.tts.TextToSpeech;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class SplashActivity extends AppCompatActivity {
 
     private TextToSpeech tts;
     private SettingsManager settingsManager;
+
+    private static final String[] ALL_PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO
+    };
+
+    private final ActivityResultLauncher<String[]> permissionLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.RequestMultiplePermissions(),
+                    results -> {
+                        // Mark complete regardless of grant/deny — user can change in Settings
+                        settingsManager.setFirstLaunchComplete();
+                        checkInternetAndProceed();
+                    }
+            );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,39 +75,69 @@ public class SplashActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Handle Welcome Voice greeting
         if (settingsManager.isWelcomeVoiceEnabled()) {
             tts = new TextToSpeech(getApplicationContext(), status -> {
                 if (status == TextToSpeech.SUCCESS) {
                     tts.setLanguage(new Locale(settingsManager.getAppLanguage()));
                     if (!isFinishing()) {
-                        tts.speak(getString(R.string.welcome_to_newsreader), TextToSpeech.QUEUE_FLUSH, null, "welcome_id");
+                        tts.speak(getString(R.string.welcome_to_newsreader),
+                                TextToSpeech.QUEUE_FLUSH, null, "welcome_id");
                     }
                 }
             });
         }
 
-        // Just check internet and proceed after a delay
-        new Handler(Looper.getMainLooper()).postDelayed(this::checkInternetAndProceed, 2500);
+        if (settingsManager.isFirstLaunch()) {
+            // Show splash for 800 ms so user sees the logo, then request permissions
+            new Handler(Looper.getMainLooper()).postDelayed(
+                    this::requestFirstLaunchPermissions, 800);
+        } else {
+            // Returning user — full 2.5 s splash then proceed
+            new Handler(Looper.getMainLooper()).postDelayed(
+                    this::checkInternetAndProceed, 2500);
+        }
+    }
+
+    private void requestFirstLaunchPermissions() {
+        List<String> toRequest = new ArrayList<>();
+        for (String perm : ALL_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(this, perm)
+                    != PackageManager.PERMISSION_GRANTED) {
+                toRequest.add(perm);
+            }
+        }
+        if (!toRequest.isEmpty()) {
+            permissionLauncher.launch(toRequest.toArray(new String[0]));
+        } else {
+            // All already granted (e.g. re-install on same device)
+            settingsManager.setFirstLaunchComplete();
+            checkInternetAndProceed();
+        }
     }
 
     private void checkInternetAndProceed() {
+        if (isFinishing()) return;
         if (isNetworkAvailable()) {
             startActivity(new Intent(SplashActivity.this, HomepageActivity.class));
             finish();
         } else {
-            Toast.makeText(this, "No internet connection. The app will close.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,
+                    "No internet connection. The app will close.",
+                    Toast.LENGTH_LONG).show();
             new Handler(Looper.getMainLooper()).postDelayed(this::finish, 3000);
         }
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
-            return capabilities != null && (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                    capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null) {
+            NetworkCapabilities cap =
+                    cm.getNetworkCapabilities(cm.getActiveNetwork());
+            return cap != null &&
+                    (cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            cap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            cap.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
         }
         return false;
     }

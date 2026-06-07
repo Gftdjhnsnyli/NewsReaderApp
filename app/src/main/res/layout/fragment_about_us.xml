@@ -7,6 +7,7 @@
     android:background="?android:attr/windowBackground">
 
     <!-- Header matching Bookmarks style -->
+    <!--  ADDED: fitsSystemWindows and background to handle Edge-to-Edge status bar -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -16,6 +17,9 @@
         android:paddingTop="20dp"
         android:paddingBottom="16dp"
         android:gravity="center_vertical"
+        android:elevation="4dp"
+        android:background="?android:attr/windowBackground"
+        android:fitsSystemWindows="true"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -26,6 +30,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="?attr/homeAsUpIndicator"
             app:tint="?android:attr/textColorPrimary"
+            android:clickable="true"
+            android:focusable="true"
             android:contentDescription="@string/back" />
 
         <View

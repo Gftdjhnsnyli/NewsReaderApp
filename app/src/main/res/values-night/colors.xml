@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#90CAF9</color>
-    <color name="primary_light">#E3F2FD</color>
-    <color name="primary_dark">#42A5F5</color>
+    <!-- Modern "Midnight Slate" Palette -->
+    <color name="primary">#38BDF8</color>
+    <color name="primary_light">#0EA5E9</color>
+    <color name="primary_dark">#0369A1</color>
 
-    <color name="accent">#FFD54F</color>
+    <!-- Secondary/Accent (Soft Amber) -->
+    <color name="accent">#FDBA74</color>
 
-    <color name="background">#121212</color>
-    <color name="surface">#1E1E1E</color>
-    <color name="text_primary">#E1E1E1</color>
-    <color name="text_secondary">#BDBDBD</color>
-    <color name="divider">#323232</color>
+    <!-- Neutral Colors -->
+    <color name="background">#0F172A</color>
+    <color name="surface">#1E293B</color>
+    <color name="text_primary">#F8FAFC</color>
+    <color name="text_secondary">#94A3B8</color>
+    <color name="divider">#334155</color>
+
+    <!-- Standard Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
 </resources>

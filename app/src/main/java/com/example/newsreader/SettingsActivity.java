@@ -2,6 +2,7 @@ package com.example.newsreader;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +21,19 @@ public class SettingsActivity extends AppCompatActivity {
         
         setContentView(R.layout.activity_settings);
 
-        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false); // We have a custom back button
+                getSupportActionBar().setDisplayShowTitleEnabled(false);
+            }
+        }
+
+        View btnBack = findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
 
         RadioGroup rgLanguage = findViewById(R.id.rg_language);
         RadioGroup rgTheme = findViewById(R.id.rg_theme_settings);

@@ -19,11 +19,7 @@ public class OfflineNewsFragment extends Fragment {
         // Setup Toolbar Back Button
         View btnBack = view.findViewById(R.id.btn_back);
         if (btnBack != null) {
-            btnBack.setOnClickListener(v -> {
-                if (getParentFragmentManager() != null) {
-                    getParentFragmentManager().popBackStack();
-                }
-            });
+            btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
         }
 
         return view;

@@ -12,17 +12,20 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Contacts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <!-- Storage/Photos (API 33+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <!-- Storage (Older APIs) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
 
     <!-- Hardware features -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
-
 
     <application
         android:allowBackup="true"
@@ -56,6 +59,8 @@
         <activity android:name=".SettingsActivity" />
 
         <activity android:name=".AboutActivity" />
+
+        <activity android:name=".NotificationsActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

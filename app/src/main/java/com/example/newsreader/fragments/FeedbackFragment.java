@@ -114,11 +114,7 @@ public class FeedbackFragment extends Fragment {
 
         // 0. Back Button Listener
         if (btnBack != null) {
-            btnBack.setOnClickListener(v -> {
-                if (getParentFragmentManager() != null) {
-                    getParentFragmentManager().popBackStack();
-                }
-            });
+            btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
         }
 
         // 1. Dynamic Rating Bar Listener with Unselect Logic

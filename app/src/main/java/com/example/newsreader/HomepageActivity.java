@@ -1,74 +1,42 @@
 package com.example.newsreader;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
-import com.example.newsreader.fragments.AboutUsFragment;
 import com.example.newsreader.fragments.BookmarksFragment;
 import com.example.newsreader.fragments.ExploreFragment;
 import com.example.newsreader.fragments.FeedbackFragment;
 import com.example.newsreader.fragments.FeedsFragment;
-import com.example.newsreader.fragments.NotificationsFragment;
 import com.example.newsreader.fragments.OfflineNewsFragment;
 import com.example.newsreader.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class HomepageActivity extends AppCompatActivity {
 
     private SettingsManager settingsManager;
     private BottomNavigationView bottomNav;
 
-    // ✅ Permission Launcher for initial setup
-    private final ActivityResultLauncher<String[]> permissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestMultiplePermissions(),
-            results -> {
-                boolean allGranted = true;
-                for (Map.Entry<String, Boolean> entry : results.entrySet()) {
-                    if (!entry.getValue()) {
-                        allGranted = false;
-                        Log.w("Permissions", "Denied: " + entry.getKey());
-                    }
-                }
-                if (allGranted) {
-                    Toast.makeText(this, "Permissions granted. Enjoy the app!", Toast.LENGTH_SHORT).show();
-                }
-            }
-    );
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         settingsManager = new SettingsManager(this);
         applyTheme();
-        
-        // Consistent EdgeToEdge with Splash screen to prevent layout jumps
+
         EdgeToEdge.enable(this);
-        
         setContentView(R.layout.activity_homepage);
 
-        // Apply insets to the root view to avoid overlap with status/navigation bars
         View rootView = findViewById(android.R.id.content);
         if (rootView != null) {
             ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
@@ -81,22 +49,19 @@ public class HomepageActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(R.string.app_name);
                 getSupportActionBar().setDisplayShowTitleEnabled(false);
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
-
-            toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+            toolbar.setNavigationOnClickListener(v ->
+                    getOnBackPressedDispatcher().onBackPressed());
         }
 
         View notificationBtn = findViewById(R.id.btn_notification);
         if (notificationBtn != null) {
-            notificationBtn.setOnClickListener(v -> getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new NotificationsFragment())
-                    .addToBackStack(null)
-                    .commit());
+            notificationBtn.setOnClickListener(v ->
+                    startActivity(new Intent(this, NotificationsActivity.class)));
         }
 
         bottomNav = findViewById(R.id.bottom_navigation);
@@ -128,85 +93,72 @@ public class HomepageActivity extends AppCompatActivity {
             return true;
         });
 
-        // Sync bottom navigation and toolbar visibility when backstack changes
-        getSupportFragmentManager().addOnBackStackChangedListener(this::updateUIForCurrentFragment);
+        getSupportFragmentManager().addOnBackStackChangedListener(
+                this::updateUIForCurrentFragment);
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new FeedsFragment())
                     .commit();
-            // We need to call it manually for the initial fragment
             if (rootView != null) {
                 rootView.post(this::updateUIForCurrentFragment);
             }
         }
 
-        // ✅ Request permissions on first launch as the app starts
-        if (settingsManager.isFirstLaunch()) {
-            requestInitialPermissions();
-            settingsManager.setFirstLaunchComplete();
-        }
-    }
-
-    // ✅ Method to request required permissions
-    private void requestInitialPermissions() {
-        List<String> permissions = new ArrayList<>();
-
-        // Since minSdk is 34, we only need the newer media permissions and basic ones
-        permissions.add(Manifest.permission.POST_NOTIFICATIONS);
-        permissions.add(Manifest.permission.READ_MEDIA_IMAGES);
-        permissions.add(Manifest.permission.READ_MEDIA_VIDEO);
-        permissions.add(Manifest.permission.CAMERA);
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-
-        List<String> toRequest = new ArrayList<>();
-        for (String perm : permissions) {
-            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
-                toRequest.add(perm);
-            }
-        }
-
-        if (!toRequest.isEmpty()) {
-            permissionLauncher.launch(toRequest.toArray(new String[0]));
-        }
+        // Permissions are handled in SplashActivity on first launch — nothing to do here.
     }
 
     private void updateUIForCurrentFragment() {
-        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        Fragment current =
+                getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         View appBar = findViewById(R.id.app_bar);
         TextView titleView = findViewById(R.id.toolbar_title);
         View notificationBtn = findViewById(R.id.btn_notification);
-        
-        if (currentFragment instanceof FeedsFragment) {
+
+        if (getSupportActionBar() != null) {
+            boolean isMain = current instanceof FeedsFragment ||
+                    current instanceof ExploreFragment ||
+                    current instanceof BookmarksFragment ||
+                    current instanceof ProfileFragment;
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!isMain);
+        }
+
+        if (current instanceof FeedsFragment) {
             bottomNav.getMenu().findItem(R.id.nav_feeds).setChecked(true);
             bottomNav.setVisibility(View.VISIBLE);
             if (appBar != null) appBar.setVisibility(View.VISIBLE);
             if (titleView != null) titleView.setText(R.string.app_name);
             if (notificationBtn != null) notificationBtn.setVisibility(View.VISIBLE);
-        } else if (currentFragment instanceof ExploreFragment) {
+
+        } else if (current instanceof ExploreFragment) {
             bottomNav.getMenu().findItem(R.id.nav_explore).setChecked(true);
             bottomNav.setVisibility(View.VISIBLE);
             if (appBar != null) appBar.setVisibility(View.VISIBLE);
             if (titleView != null) titleView.setText(R.string.title_explore);
             if (notificationBtn != null) notificationBtn.setVisibility(View.GONE);
-        } else if (currentFragment instanceof BookmarksFragment) {
+
+        } else if (current instanceof BookmarksFragment) {
             bottomNav.getMenu().findItem(R.id.nav_bookmarks).setChecked(true);
             bottomNav.setVisibility(View.VISIBLE);
             if (appBar != null) appBar.setVisibility(View.VISIBLE);
             if (titleView != null) titleView.setText(R.string.title_bookmarks);
             if (notificationBtn != null) notificationBtn.setVisibility(View.GONE);
-        } else if (currentFragment instanceof ProfileFragment) {
+
+        } else if (current instanceof ProfileFragment) {
             bottomNav.getMenu().findItem(R.id.nav_profile).setChecked(true);
             bottomNav.setVisibility(View.VISIBLE);
             if (appBar != null) appBar.setVisibility(View.VISIBLE);
             if (titleView != null) titleView.setText(R.string.title_profile);
             if (notificationBtn != null) notificationBtn.setVisibility(View.GONE);
-        } else if (currentFragment instanceof FeedbackFragment || currentFragment instanceof OfflineNewsFragment || currentFragment instanceof AboutUsFragment || currentFragment instanceof NotificationsFragment) {
-            // These sub-pages handle their own headers for a more immersive feel
+
+        } else if (current instanceof FeedbackFragment ||
+                current instanceof OfflineNewsFragment) {
+            // These sub-pages manage their own header; hide the shared app bar & nav
             bottomNav.setVisibility(View.GONE);
             if (appBar != null) appBar.setVisibility(View.GONE);
         }
+        // AboutActivity is a separate Activity — it does not appear in the fragment
+        // container, so no case needed here.
     }
 
     private void applyTheme() {
@@ -229,21 +181,22 @@ public class HomepageActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        Fragment selectedFragment = null;
 
         if (itemId == R.id.menu_feedback) {
-            selectedFragment = new FeedbackFragment();
-        } else if (itemId == R.id.menu_offline_news) {
-            selectedFragment = new OfflineNewsFragment();
-        } else if (itemId == R.id.menu_about_us) {
-            selectedFragment = new AboutUsFragment();
-        }
-
-        if (selectedFragment != null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, selectedFragment)
+                    .replace(R.id.fragment_container, new FeedbackFragment())
                     .addToBackStack(null)
                     .commit();
+            return true;
+        } else if (itemId == R.id.menu_offline_news) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new OfflineNewsFragment())
+                    .addToBackStack(null)
+                    .commit();
+            return true;
+        } else if (itemId == R.id.menu_about_us) {
+            // AboutUs is now a full Activity
+            startActivity(new Intent(this, AboutActivity.class));
             return true;
         }
 
